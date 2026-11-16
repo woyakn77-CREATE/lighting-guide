@@ -1294,7 +1294,7 @@ td.docs-td { min-width: 150px; }
     </div>
     <p id="dcIntro"></p>
     <div class="dc-input">
-      <input type="text" id="dcInput" class="dc-field" placeholder="Part number, or a search with % as wild card, for example %mock%" autocomplete="off" spellcheck="false" aria-label="Part number">
+      <input type="text" id="dcInput" class="dc-field" placeholder="Part number, or a search with * as wild card, for example *downlight*" autocomplete="off" spellcheck="false" aria-label="Part number">
       <button type="button" class="lk-btn primary" id="dcGo">Decode</button>
       <button type="button" class="lk-btn" id="dcClear">Clear</button>
     </div>
@@ -1450,13 +1450,15 @@ td.docs-td { min-width: 150px; }
     <p><strong>What changed.</strong> The Family list for Wattstopper now uses the six product categories on the Legrand website: Light Switches and Dimmers, Sensors and Timers, Lighting Control Components, Power Packs and Load Controllers, Software and Configuration Tools, and Wireless Controls. Before, it listed one entry per cut sheet title. The cut sheet title is still shown under the category in the Family column and is still searchable.</p>
     <p><strong>How sheets were placed.</strong> The website gives category names and sub-category names but no list of which sheet belongs where, so each of the 305 cut sheets was placed by its title and product type. Counts: Light Switches and Dimmers 28, Lighting Control Components 64, Power Packs and Load Controllers 40, Sensors and Timers 122, Services and Support 10, Software and Configuration Tools 4, Wireless Controls 37. Sheets for wireless products (ZigBee, LMRC-611, WRC, FSP-600, LMFS-601 and similar) are in Wireless Controls, not in the wired category they would otherwise match, as on the website. Check a sheet's category against the website if it matters.</p>
     <p><strong>Services and Support is not a website category.</strong> Ten cut sheets (service agreements, remote and phone support) fit none of the six categories, so they sit in a seventh entry named Services and Support.</p>
+    <h2>November 2026: Wild card suggested as * (Rev 29)</h2>
+    <p><strong>What changed.</strong> The Decoder tab and the controls lookup now suggest * as the wild card (for example *downlight* or MLHA*), and the example chips, placeholders and hints change with the brand selected. % still works. Finelite part numbers contain a literal % (for example FC-10%), so a % inside a part number is read as part of the number, not a wild card.</p>
 
     <h2>November 2026: Competitors removed (Rev 29)</h2>
     <p><strong>What changed.</strong> Fail-Safe, Lithonia Lighting and Holophane are gone from the Catalog tab, the brand buttons, the dimension fields and the Excel Dimensions sheet. The tool now covers the six Legrand brands: Kenall, Pinnacle, Finelite, Focal Point, OCL and Wattstopper. Earlier release notes below that mention competitor brands describe what was true at the time.</p>
     <p><strong>Adding them back.</strong> The 29 catalog rows and the dimension readings from 24 competitor spec sheets are saved outside the page, so restoring them is a rebuild, not new research.</p>
 
     <h2>November 2026: Part number decoder for Finelite, Focal Point and OCL (Rev 28)</h2>
-    <p><strong>What changed.</strong> The Decoder tab (part number breakdown, spec sheet code lookup and the % wild card search) now covers Finelite (49 sheets), Focal Point (171) and OCL (85) as well as Kenall and Pinnacle. The Brand button has three new choices, and Legrand now means all five brands (804 spec sheets). Fail-Safe, Lithonia and Holophane are not decoded.</p>
+    <p><strong>What changed.</strong> The Decoder tab (part number breakdown, spec sheet code lookup and the wild card search) now covers Finelite (49 sheets), Focal Point (171) and OCL (85) as well as Kenall and Pinnacle. The Brand button has three new choices, and Legrand now means all five brands (804 spec sheets). Fail-Safe, Lithonia and Holophane are not decoded.</p>
     <p><strong>Where the grammar comes from.</strong> Each sheet's ordering table was read from the spec sheet PDF. The page decodes a part number against that table, so the meanings are the manufacturer's own wording.</p>
     <p><strong>Limits.</strong> About 100 of the 247 sheets that print an example part number do not decode that example cleanly. The sheets contradict their own tables, for example placeholders (XX), a code that is not in the table, or a different color temperature code. Fifty-eight sheets print no example. Many Focal Point and Finelite sheets list the housing and the trim as two separate strings, or give Standard and Tunable tables together. Confirm any field marked "Not in this sheet's table" in the PDF. OCL AA1 has no spec sheet and is not decoded.</p>
 
@@ -3162,7 +3164,7 @@ render();
   function stats() { return { sheets: D.p.length, entries: D.c.length }; }
   function examples(mode) {
     if (mode === "code") return ["-OEM", "-U", "-W", "-BK", "BAA"];
-    return ["LMRC-112-M-U", "HBP-111-L7-OEM", "FSP-L2-BR", "DSW-200-LA", "LMRC%"];
+    return ["LMRC-112-M-U", "HBP-111-L7-OEM", "FSP-L2-BR", "DSW-200-LA", "LMRC*"];
   }
 
   function entryRow(e, withSheet) {
@@ -3250,11 +3252,11 @@ render();
 
   function renderCatalog(val, out) {
     var q = keyOf(val), wild = /[%*]/.test(val);
-    if (!q) { out.innerHTML = '<p class="dc-hint">Enter a Wattstopper catalog number to see its description, ratings, cut sheet and the other catalog numbers on that sheet. Use % as a wild card, for example LMRC% or %sensor%.</p>'; return; }
+    if (!q) { out.innerHTML = '<p class="dc-hint">Enter a Wattstopper catalog number to see its description, ratings, cut sheet and the other catalog numbers on that sheet. Use * as a wild card, for example LMRC* or *sensor*.</p>'; return; }
     if (wild) {
       var hits = searchEntries(val), CAP = 200;
       var h = '<p class="dc-score"><b>' + hits.length + "</b> result" + (hits.length === 1 ? "" : "s") + ' match <span class="dc-mono">' + esc(val) + "</span>." + (hits.length > CAP ? " Showing the first " + CAP + ". Add more characters to narrow it." : "") + "</p>";
-      out.innerHTML = hits.length ? h + entryTable(hits, CAP) : h + '<p class="dc-hint">Nothing matched. % stands for any run of characters, for example LMRC% or %sensor%.</p>';
+      out.innerHTML = hits.length ? h + entryTable(hits, CAP) : h + '<p class="dc-hint">Nothing matched. * stands for any run of characters, for example LMRC* or *sensor*.</p>';
       return;
     }
     var ex = byKey[q];
@@ -3271,12 +3273,12 @@ render();
     if (pre.length) { out.innerHTML = '<p class="dc-score"><b>' + pre.length + "</b> catalog number" + (pre.length === 1 ? "" : "s") + " start with " + esc(q) + ".</p>" + entryTable(pre, 200); return; }
     var part = E.filter(function (e) { return q.length >= 3 && e.k.indexOf(q) >= 0; });
     if (part.length) { out.innerHTML = '<p class="dc-score"><b>' + part.length + "</b> catalog number" + (part.length === 1 ? "" : "s") + " contain " + esc(q) + ".</p>" + entryTable(part, 200); return; }
-    out.innerHTML = '<p class="dc-hint">No Wattstopper catalog number matched ' + esc(q) + ". Try % as a wild card, for example " + esc(q.slice(0, 4)) + "%. Only the cut sheets on the Legrand Wattstopper resource page were read, so a number sold under another product line will not appear.</p>";
+    out.innerHTML = '<p class="dc-hint">No Wattstopper catalog number matched ' + esc(q) + ". Try * as a wild card, for example " + esc(q.slice(0, 4)) + "*. Only the cut sheets on the Legrand Wattstopper resource page were read, so a number sold under another product line will not appear.</p>";
   }
 
   function renderCode(val, out) {
     var raw = val.trim();
-    if (!raw) { out.innerHTML = '<p class="dc-hint">Enter a suffix or option code from a cut sheet, for example -OEM, -U or BK, to see what it means and which cut sheets use it. Use % as a wild card, or type words such as bulk packed to find the codes for them.</p>'; return; }
+    if (!raw) { out.innerHTML = '<p class="dc-hint">Enter a suffix or option code from a cut sheet, for example -OEM, -U or BK, to see what it means and which cut sheets use it. Use * as a wild card, or type words such as bulk packed to find the codes for them.</p>'; return; }
     var wild = /[%*]/.test(raw), q = raw.replace(/^-+/, "").toUpperCase().replace(MARKS, "");
     var hits, byWords = false;
     if (wild) { var re = likeRe(q); hits = SI.filter(function (s) { return re.test(s.code); }); }
@@ -3284,7 +3286,7 @@ render();
       hits = SI.filter(function (s) { return s.code === q; });
       if (!hits.length && q.length >= 3) { var ql = raw.toLowerCase(); hits = SI.filter(function (s) { return s.mean.toLowerCase().indexOf(ql) >= 0; }); byWords = true; }
     }
-    if (!hits.length) { out.innerHTML = '<p class="dc-hint">No suffix or option code or description matched ' + esc(raw) + ". Try % as a wild card, for example " + esc(q) + "%.</p>"; return; }
+    if (!hits.length) { out.innerHTML = '<p class="dc-hint">No suffix or option code or description matched ' + esc(raw) + ". Try * as a wild card, for example " + esc(q) + "*.</p>"; return; }
     var groups = {}, order = [];
     hits.forEach(function (s) {
       var k = s.code + "|" + normMean(s.mean);
@@ -3321,8 +3323,24 @@ render();
   var D = window.PNDecoder, G = null, sel = null, last = null, inited = false, brand = "legrand", line = "lighting", mode = "pn", vals = { pn: "", code: "" }, CI = null;
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-  var CODE_EX = ["TC", "DCC", "FS", "LVCD", "top cover"];
-  var EXAMPLES = ["MLHA12-48-F-MW-R-PP-90B-35K8-ATW-DV-FS", "CD-N-830HO-26’-AC48G1-1-EL1-1-0-W-AE", "BHAERT-22-F-CS-9-35L/55L-40K9-DIM1-DV-NLA"];
+  // Suggested searches per brand. Every entry was checked against the data for that brand.
+  var BRAND_EX = {
+    legrand: { pn: ["CDL6-FF-2FW-18L-40K8-W-CSS-T-RIG6-DV-DIM1", "CD-N-830HO-26\u2019-AC48G1-1-EL1-1-0-W-AE", "LC22-SDO-SW-1100L-935K-DNS-FL1-WH", "GL1-P1EM-36-MW-NFA-LED1/35K-UNV-48-DM1-PBK"], code: ["TC", "DCC", "FS", "LVCD", "top cover"], w: "*downlight*", p: "MLHA*" },
+    Kenall: { pn: ["CDL6-FF-2FW-18L-40K8-W-CSS-T-RIG6-DV-DIM1", "EPDL6-FF-5FW-18L-40K8-W-CSS-T-RIG6-DV-DIM1", "DFDL6-NF-5FW-22C-32K8-M-CSS-T-RID6-DV-DIM1-FS"], code: ["FS", "DV", "LEL", "DCC", "emergency"], w: "*downlight*", p: "MLHA*" },
+    Pinnacle: { pn: ["CD-N-830HO-26\u2019-AC48G1-1-EL1-1-0-W-AE", "CU1D-A-N-835HO-6\u2019-CAC48G1-U-FSD-1-0-W", "PKD-WB-N-830HO-N-6\u2019-WA6-U-FSD-1-0-W"], code: ["TC", "FSD", "BA", "BR", "top cover"], w: "*acoustic*", p: "ADEO*" },
+    Finelite: { pn: ["HP - 2 - P - ABU - 36' - FA50 - C1 - 8H - PEW", "HPW-LED - 4'- FR - S - 835 - 277V - SC - C1 - RLA", "S11-LED-MF - 8' - S - 835 - SC - 96W - 120V - RLA"], code: ["SC", "RLD", "NL", "GTD", "red list"], w: "*pendant*", p: "HP*" },
+    "Focal Point": { pn: ["LC22-SDO-SW-1100L-935K-DNS-FL1-WH", "FLCY3N-RD-1000DN-35K-DNT-FL1-CD", "FSM1CBS-1000DL-930K-NFL-BS"], code: ["UNV", "LV", "LOK", "CP", "acoustic"], w: "*cylinder*", p: "FLCY*" },
+    OCL: { pn: ["RV3S-P1EM-SQS-1200-MW-WTP-LED1/935K-UNV-100-DM1", "GL1-P1EM-36-MW-NFA-LED1/35K-UNV-48-DM1-PBK", "SE1-P1EM-36-MW-WTP-LED1-30K-UNV-100-DM1-PBK"], code: ["UNV", "WTP", "MOD", "SMP", "textured"], w: "*pendant*", p: "CM*" }
+  };
+  // A % inside a part number (Finelite prints FC-10%) is part of the number. It is a wild card only at the end, at the start of a word, or before another character.
+  function isSearch(v) { return v.indexOf("*") >= 0 || /%(?![\s\-\/])/.test(v); }
+  function bex() { return BRAND_EX[brand] || BRAND_EX.legrand; }
+  function wcText() { var e = bex(); return e.w + " or " + e.p; }
+  function chipsHtml(list) { return list.map(function (x) { return '<button type="button" class="lk-chip-btn">' + esc(x) + "</button>"; }).join(""); }
+  function refreshChips() {
+    if (line === "controls") return;
+    $("dcEx").innerHTML = chipsHtml(mode === "pn" ? bex().pn : bex().code);
+  }
   var STATUS = {
     ok: ["Matched", "dc-ok"], loose: ["Matched, printed code differs slightly", "dc-warn"], free: ["Free entry", "dc-free"],
     unlisted: ["Not in this sheet's table", "dc-warn"], order: ["Matched, out of order", "dc-warn"], unmatched: ["Unrecognized", "dc-bad"], missing: ["Required, not found", "dc-bad"], none: ["Optional, not used", "dc-mute"]
@@ -3351,7 +3369,7 @@ render();
   function clip(t, n) { t = String(t || "").replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1) + "\u2026" : t; }
   function renderCode(q) {
     var out = $("dcOut");
-    if (!q) { out.innerHTML = '<p class="dc-hint">Enter a code from a spec sheet, for example TC, to see what it means and where it is used. Use % as a wild card, or type words such as top cover to find the codes for them.</p>'; return; }
+    if (!q) { out.innerHTML = '<p class="dc-hint">Enter a code from a spec sheet, for example ' + esc(bex().code[0]) + ', to see what it means and where it is used. Use * as a wild card, or type words such as ' + esc(bex().code[bex().code.length - 1]) + ' to find the codes for them.</p>'; return; }
     if (!CI) buildCI();
     var inBrand = function (e) { return brand === "legrand" || e.g.b === brand; };
     var wild = q.indexOf("%") >= 0 || q.indexOf("*") >= 0;
@@ -3364,7 +3382,7 @@ render();
       hits = CI.filter(function (e) { return inBrand(e) && (e.mean.toLowerCase().indexOf(ql) >= 0 || e.printed.toLowerCase() === ql); });
       byWords = true;
     }
-    if (!hits.length) { out.innerHTML = '<p class="dc-hint">No code or description matched ' + esc(q) + (brand === "legrand" ? "" : " in " + esc(brand)) + ". Try % as a wild card, for example " + esc(q) + "%.</p>"; return; }
+    if (!hits.length) { out.innerHTML = '<p class="dc-hint">No code or description matched ' + esc(q) + (brand === "legrand" ? "" : " in " + esc(brand)) + ". Try * as a wild card, for example " + esc(q) + "*.</p>"; return; }
     var groups = {}, order = [];
     hits.forEach(function (e) {
       var k = e.code + "|" + normMean(e.mean);
@@ -3409,23 +3427,23 @@ render();
     vals[mode] = $("dcInput").value; mode = m; $("dcInput").value = vals[m] || "";
     document.querySelectorAll("#dcMode button").forEach(function (b) { b.classList.toggle("active", b.dataset.m === m); });
     applyLineText();
-    var list = line === "controls" ? window.CtlDec.examples(m) : (m === "pn" ? EXAMPLES : CODE_EX);
+    var list = line === "controls" ? window.CtlDec.examples(m) : (m === "pn" ? bex().pn : bex().code);
     $("dcExLabel").textContent = "Try an example:";
     $("dcEx").innerHTML = list.map(function (x) { return '<button type="button" class="lk-chip-btn">' + esc(x) + "</button>"; }).join("");
     sel = null; render();
   }
   var INTRO = {
-    lighting: 'Part number: breaks a part number into fields, with the spec sheet PDF and survey weights. Use % as a wild card to search products, for example %mock% or MLHA12%. Spec sheet code: enter a code such as TC to see what it means and which spec sheets use it. Legrand here means the Kenall, Pinnacle, Finelite, Focal Point and OCL spec sheets that were read (804). Confirm anything marked "Not in this sheet\'s table" in the PDF.',
-    controls: 'Catalog number: shows the description, ratings and cut sheet for a Wattstopper catalog number, and the other catalog numbers printed on that sheet. A number with suffixes, such as LMRC-112-M-U, is split and each suffix is checked against the codes the cut sheets print. Use % as a wild card, for example LMRC% or %sensor%. Suffix or option code: enter a code such as -OEM to see what it means and which cut sheets use it. Wattstopper cut sheets list catalog numbers in tables and rarely print a field-by-field build-up, so most numbers are looked up rather than decoded. The meanings are the cut sheets\' own wording.'
+    lighting: function () { return 'Part number: breaks a part number into fields, with the spec sheet PDF and survey weights. Use * as a wild card to search products, for example ' + wcText() + '. Spec sheet code: enter a code such as ' + bex().code[0] + ' to see what it means and which spec sheets use it. Legrand here means the Kenall, Pinnacle, Finelite, Focal Point and OCL spec sheets that were read (804). Confirm anything marked "Not in this sheet\'s table" in the PDF.'; },
+    controls: 'Catalog number: shows the description, ratings and cut sheet for a Wattstopper catalog number, and the other catalog numbers printed on that sheet. A number with suffixes, such as LMRC-112-M-U, is split and each suffix is checked against the codes the cut sheets print. Use * as a wild card, for example LMRC* or *sensor*. Suffix or option code: enter a code such as -OEM to see what it means and which cut sheets use it. Wattstopper cut sheets list catalog numbers in tables and rarely print a field-by-field build-up, so most numbers are looked up rather than decoded. The meanings are the cut sheets\' own wording.'
   };
   function applyLineText() {
     var c = line === "controls", m = mode;
     $("dcMode").querySelector('[data-m="pn"]').textContent = c ? "Catalog number" : "Part number";
     $("dcMode").querySelector('[data-m="code"]').textContent = c ? "Suffix or option code" : "Spec sheet code";
     $("dcBrandWrap").style.display = c ? "none" : "";
-    $("dcIntro").textContent = INTRO[line];
-    $("dcInput").placeholder = c ? (m === "pn" ? "Catalog number, or a search with % as wild card, for example LMRC%" : "Suffix or option code, for example -OEM, or words such as bulk packed")
-      : (m === "pn" ? "Part number, or a search with % as wild card, for example %mock%" : "Spec sheet code, for example TC, or words such as top cover");
+    $("dcIntro").textContent = typeof INTRO[line] === "function" ? INTRO[line]() : INTRO[line];
+    $("dcInput").placeholder = c ? (m === "pn" ? "Catalog number, or a search with * as wild card, for example LMRC*" : "Suffix or option code, for example -OEM, or words such as bulk packed")
+      : (m === "pn" ? "Part number, or a search with * as wild card, for example " + bex().w : "Spec sheet code, for example " + bex().code[0] + ", or words such as " + bex().code[bex().code.length - 1]);
     $("dcInput").setAttribute("aria-label", c ? (m === "pn" ? "Catalog number" : "Suffix or option code") : (m === "pn" ? "Part number" : "Spec sheet code"));
     $("dcNoneWrap").style.display = (m === "pn" && !c) ? "" : "none";
     $("dcGo").textContent = m === "pn" ? (c ? "Look up" : "Decode") : "Look up";
@@ -3439,6 +3457,7 @@ render();
   }
   function setBrand(b) {
     brand = b; document.querySelectorAll("#dcBrand button").forEach(function (x) { x.classList.toggle("active", x.dataset.b === b); });
+    refreshChips(); applyLineText();
     sel = null; render();
   }
   function likeRe(p) {
@@ -3486,7 +3505,7 @@ render();
     var out = $("dcOut"), hits = searchAll(val), CAP = 200;
     var h = '<p class="dc-score"><b>' + hits.length + "</b> result" + (hits.length === 1 ? "" : "s") + " match <span class=\"dc-mono\">" + esc(val) + "</span>." +
       (hits.length > CAP ? " Showing the first " + CAP + ". Add more characters to narrow it." : "") + "</p>";
-    if (!hits.length) { out.innerHTML = h + '<p class="dc-hint">Nothing matched. % stands for any run of characters, for example %mock% or MLHA12%.</p>'; return; }
+    if (!hits.length) { out.innerHTML = h + '<p class="dc-hint">Nothing matched. * stands for any run of characters, for example ' + esc(wcText()) + '.</p>'; return; }
     h += '<div class="lk-table-wrap"><table class="lk-table dc-table dc-search"><thead><tr><th>Brand</th><th>Product code</th><th>Family</th><th>Matched in</th><th>Example part number</th><th></th></tr></thead><tbody>';
     hits.slice(0, CAP).forEach(function (x, i) {
       var g = x.g;
@@ -3502,8 +3521,8 @@ render();
     var out = $("dcOut"), val = $("dcInput").value.trim();
     if (line === "controls") { if (window.CtlDec && window.CtlDec.ready()) window.CtlDec.render(mode, val, out); else out.innerHTML = '<p class="dc-hint">Controls data failed to load.</p>'; return; }
     if (mode === "code") { renderCode(val); return; }
-    if (!val) { out.innerHTML = '<p class="dc-hint">Enter a part number to see each piece and what it means. Use % as a wild card to search, for example %mock% or MLHA12%.</p>'; last = null; return; }
-    if (val.indexOf("%") >= 0 || val.indexOf("*") >= 0) { last = null; renderSearch(val); return; }
+    if (!val) { out.innerHTML = '<p class="dc-hint">Enter a part number to see each piece and what it means. Use * as a wild card to search, for example ' + esc(wcText()) + '.</p>'; last = null; return; }
+    if (isSearch(val)) { last = null; renderSearch(val); return; }
     last = D.decode(pool(), val);
     var res = last.results;
     if (!res.length) { out.innerHTML = '<p class="dc-hint">Nothing to decode.</p>'; return; }
@@ -3601,7 +3620,7 @@ render();
     $("dcBrand").addEventListener("click", function (e) { var b = e.target.closest("button[data-b]"); if (b) setBrand(b.dataset.b); });
     $("dcOut").addEventListener("click", function (e) { var d = e.target.closest("[data-dec]"); if (d && d.dataset.dec) { if (mode !== "pn") { vals.code = $("dcInput").value; setMode("pn"); } $("dcInput").value = d.dataset.dec; sel = null; render(); window.scrollTo(0, 0); return; } var ct = e.target.closest("[data-ctl]"); if (ct) { if (mode !== "pn") { vals.code = $("dcInput").value; setMode("pn"); } $("dcInput").value = ct.dataset.ctl; sel = null; render(); window.scrollTo(0, 0); return; } var b = e.target.closest("[data-alt]"); if (b) { sel = +b.dataset.alt; render(); window.scrollTo(0, 0); } });
     var ex = $("dcEx");
-    ex.innerHTML = EXAMPLES.map(function (x) { return '<button type="button" class="lk-chip-btn">' + esc(x) + "</button>"; }).join("");
+    ex.innerHTML = chipsHtml(bex().pn);
     ex.addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { $("dcInput").value = b.textContent; sel = null; render(); } });
     applyLineText();
     render();
